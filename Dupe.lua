@@ -427,3 +427,53 @@ DupeButton.MouseButton1Click:Connect(function()
     
     DupeButton.Text = "Dupe: Active"
 end)
+
+local DragHandle = Instance.new("Frame")
+DragHandle.Size = UDim2.new(0, 80, 0, 3)
+DragHandle.Position = UDim2.new(0.5, -40, 0, 0)
+DragHandle.AnchorPoint = Vector2.new(0.5, 0)
+DragHandle.BackgroundColor3 = Color3.fromRGB(160, 160, 160)
+DragHandle.BackgroundTransparency = 0.5
+DragHandle.BorderSizePixel = 0
+DragHandle.Parent = TopBar
+DragHandle.Active = true
+DragHandle.ZIndex = TopBar.ZIndex + 10
+
+local dragging = false
+local dragStart
+local startPos
+
+DragHandle.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = TopBar.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if not dragging then return end
+	if input.UserInputType ~= Enum.UserInputType.MouseMovement and input.UserInputType ~= Enum.UserInputType.Touch then return end
+
+	local delta = input.Position - dragStart
+
+	TopBar.Position = UDim2.new(
+		startPos.X.Scale,
+		startPos.X.Offset + delta.X,
+		startPos.Y.Scale,
+		startPos.Y.Offset + delta.Y
+	)
+
+	CloseBtn.Position = UDim2.new(
+		CloseBtn.Position.X.Scale,
+		CloseBtn.Position.X.Offset + delta.X,
+		CloseBtn.Position.Y.Scale,
+		CloseBtn.Position.Y.Offset + delta.Y
+	)
+end)
