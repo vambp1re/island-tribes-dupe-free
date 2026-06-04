@@ -429,8 +429,8 @@ DupeButton.MouseButton1Click:Connect(function()
 end)
 
 local DragHandle = Instance.new("Frame")
-DragHandle.Size = UDim2.new(0.5, 0, 0, 3.5) 
-DragHandle.Position = UDim2.new(0.5, 0, 2, 0) 
+DragHandle.Size = UDim2.new(0.1, 0, 0, 8) 
+DragHandle.Position = UDim2.new(0.5, 0, 1, 0) 
 DragHandle.AnchorPoint = Vector2.new(0.5, 0.5)
 DragHandle.BackgroundColor3 = Color3.fromRGB(160, 160, 160)
 DragHandle.BackgroundTransparency = 0.5
