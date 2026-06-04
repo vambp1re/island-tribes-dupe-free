@@ -7,7 +7,7 @@ local LocalPlayer = Players.LocalPlayer
 
 getgenv().configs = getgenv().configs or {}
 getgenv().configs.ChestType = "Any"
-getgenv().ItemToPutInChest = ""
+getgenv().ItemToPutInChest = "All" -- Defaults to All
 getgenv().AmountOfChestInserts = 1
 
 local MenusFolder = LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("Menus")
@@ -189,7 +189,7 @@ local StoreButton = CreateBarComponent("TextButton", "StoreBtn", "Store", 1/6)
 local UnstoreButton = CreateBarComponent("TextButton", "UnstoreBtn", "Unstore", 2/6)
 local AmountBox = CreateBarComponent("TextButton", "AmountBtn", "Amount: 1", 3/6)
 local ChestButton = CreateBarComponent("TextButton", "ChestDropdownBtn", "Chest: Any", 4/6)
-local ItemButton = CreateBarComponent("TextButton", "ItemDropdownBtn", "Item: ...", 5/6)
+local ItemButton = CreateBarComponent("TextButton", "ItemDropdownBtn", "Item: All", 5/6)
 
 local function CreateDropdownBase(parentBtn)
     local Menu = Instance.new("Frame")
@@ -329,6 +329,19 @@ local function RebuildItemDropdown()
         if child:IsA("TextButton") then child:Destroy() end 
     end
     
+    -- Insert "All" Button at the top
+    local btnAll = Instance.new("TextButton", ItemMenuScroll)
+    btnAll.Size = UDim2.new(1, 0, 0, 30) 
+    btnAll.Text = "All" 
+    btnAll.BackgroundTransparency = 0.9
+    btnAll.TextColor3 = Color3.fromRGB(255, 255, 255) 
+    btnAll.ZIndex = 6
+    btnAll.MouseButton1Click:Connect(function() 
+        getgenv().ItemToPutInChest = "All" 
+        ItemButton.Text = "Item: All" 
+        ItemDropdownMenu.Visible = false 
+    end)
+
     local ItemsToPutInChest = {}
     local added = {}
 
@@ -339,7 +352,6 @@ local function RebuildItemDropdown()
     if ActiveList then
         for _, itemFrame in pairs(ActiveList:GetChildren()) do
             if SWITCHEDITEMSTABLE[itemFrame.Name] then
-
                 if not added[itemFrame.Name] then
                     added[itemFrame.Name] = true
                     table.insert(ItemsToPutInChest, itemFrame.Name)
@@ -365,7 +377,7 @@ local function RebuildItemDropdown()
         end)
     end
     
-    ItemMenuScroll.CanvasSize = UDim2.new(0, 0, 0, #ItemsToPutInChest * 30)
+    ItemMenuScroll.CanvasSize = UDim2.new(0, 0, 0, (#ItemsToPutInChest + 1) * 30)
 end
 
 RebuildItemDropdown()
@@ -394,12 +406,46 @@ end)
 
 StoreButton.MouseButton1Click:Connect(function()
     local chest = GetClosestFilteredChest()
-    if chest then for i=1, getgenv().AmountOfChestInserts do UpdateStorageRemote:FireServer(chest, true, SWITCHEDITEMSTABLE[getgenv().ItemToPutInChest]) end end
+    if not chest then return end
+
+    if getgenv().ItemToPutInChest == "All" then
+        StoreButton.Text = "..."
+        for itemID, itemName in pairs(ALLITEMS) do
+            task.spawn(function()
+                for i = 1, getgenv().AmountOfChestInserts do
+                    UpdateStorageRemote:FireServer(chest, true, itemID)
+                    task.wait() 
+                end
+            end)
+        end
+        task.delay(1, function() StoreButton.Text = "Store" end)
+    else
+        for i=1, getgenv().AmountOfChestInserts do 
+            UpdateStorageRemote:FireServer(chest, true, SWITCHEDITEMSTABLE[getgenv().ItemToPutInChest]) 
+        end 
+    end
 end)
 
 UnstoreButton.MouseButton1Click:Connect(function()
     local chest = GetClosestFilteredChest()
-    if chest then for i=1, getgenv().AmountOfChestInserts do UpdateStorageRemote:FireServer(chest, false, SWITCHEDITEMSTABLE[getgenv().ItemToPutInChest]) end end
+    if not chest then return end
+
+    if getgenv().ItemToPutInChest == "All" then
+        UnstoreButton.Text = "..."
+        for itemID, itemName in pairs(ALLITEMS) do
+            task.spawn(function()
+                for i = 1, getgenv().AmountOfChestInserts do
+                    UpdateStorageRemote:FireServer(chest, false, itemID)
+                    task.wait()
+                end
+            end)
+        end
+        task.delay(1, function() UnstoreButton.Text = "Unstore" end)
+    else
+        for i=1, getgenv().AmountOfChestInserts do 
+            UpdateStorageRemote:FireServer(chest, false, SWITCHEDITEMSTABLE[getgenv().ItemToPutInChest]) 
+        end 
+    end
 end)
 
 AmountBox.MouseButton1Click:Connect(function() AmountMenu.Visible = not AmountMenu.Visible end)
