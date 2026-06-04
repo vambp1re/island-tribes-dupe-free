@@ -430,21 +430,26 @@ end)
 
 local DragHandle = Instance.new("Frame")
 DragHandle.Size = UDim2.new(0, 80, 0, 3)
-DragHandle.Position = UDim2.new(0.5, -40, 0, 0)
 DragHandle.AnchorPoint = Vector2.new(0.5, 0)
-DragHandle.BackgroundColor3 = Color3.fromRGB(160, 160, 160)
+DragHandle.Position = UDim2.new(0.5, 0, 1, 4)
+DragHandle.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
 DragHandle.BackgroundTransparency = 0.5
 DragHandle.BorderSizePixel = 0
-DragHandle.Parent = TopBar
 DragHandle.Active = true
-DragHandle.ZIndex = TopBar.ZIndex + 10
+DragHandle.Parent = TopBar
+
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(1, 0)
+Corner.Parent = DragHandle
 
 local dragging = false
 local dragStart
 local startPos
 
 DragHandle.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+	or input.UserInputType == Enum.UserInputType.Touch then
+
 		dragging = true
 		dragStart = input.Position
 		startPos = TopBar.Position
@@ -459,21 +464,17 @@ end)
 
 UserInputService.InputChanged:Connect(function(input)
 	if not dragging then return end
-	if input.UserInputType ~= Enum.UserInputType.MouseMovement and input.UserInputType ~= Enum.UserInputType.Touch then return end
 
-	local delta = input.Position - dragStart
+	if input.UserInputType == Enum.UserInputType.MouseMovement
+	or input.UserInputType == Enum.UserInputType.Touch then
 
-	TopBar.Position = UDim2.new(
-		startPos.X.Scale,
-		startPos.X.Offset + delta.X,
-		startPos.Y.Scale,
-		startPos.Y.Offset + delta.Y
-	)
+		local delta = input.Position - dragStart
 
-	CloseBtn.Position = UDim2.new(
-		CloseBtn.Position.X.Scale,
-		CloseBtn.Position.X.Offset + delta.X,
-		CloseBtn.Position.Y.Scale,
-		CloseBtn.Position.Y.Offset + delta.Y
-	)
+		TopBar.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
 end)
