@@ -338,22 +338,11 @@ local function RebuildItemDropdown()
 
     if ActiveList then
         for _, itemFrame in pairs(ActiveList:GetChildren()) do
-            if SWITCHEDITEMSTABLE[itemFrame.Name] and itemFrame.Name ~= "Arrow" then
-                local hasDrop = false
-                for _, subChild in pairs(itemFrame:GetDescendants()) do
-                    if subChild:IsA("TextLabel") or subChild:IsA("TextButton") then
-                        if subChild.Text == "Drop" then
-                            hasDrop = true
-                            break
-                        end
-                    end
-                end
+            if SWITCHEDITEMSTABLE[itemFrame.Name] then
 
-                if hasDrop then
-                    if not added[itemFrame.Name] then
-                        added[itemFrame.Name] = true
-                        table.insert(ItemsToPutInChest, itemFrame.Name)
-                    end
+                if not added[itemFrame.Name] then
+                    added[itemFrame.Name] = true
+                    table.insert(ItemsToPutInChest, itemFrame.Name)
                 end
             end
         end
