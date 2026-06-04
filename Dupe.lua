@@ -429,52 +429,43 @@ DupeButton.MouseButton1Click:Connect(function()
 end)
 
 local DragHandle = Instance.new("Frame")
-DragHandle.Size = UDim2.new(0, 80, 0, 3)
-DragHandle.AnchorPoint = Vector2.new(0.5, 0)
-DragHandle.Position = UDim2.new(0.5, 0, 1, 4)
-DragHandle.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
+DragHandle.Size = UDim2.new(0.5, 0, 0, 8) 
+DragHandle.Position = UDim2.new(0.5, 0, 0.5, 0) 
+DragHandle.AnchorPoint = Vector2.new(0.5, 0.5)
+DragHandle.BackgroundColor3 = Color3.fromRGB(160, 160, 160)
 DragHandle.BackgroundTransparency = 0.5
 DragHandle.BorderSizePixel = 0
-DragHandle.Active = true
 DragHandle.Parent = TopBar
+DragHandle.Active = true
+DragHandle.ZIndex = TopBar.ZIndex + 10
 
-local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(1, 0)
-Corner.Parent = DragHandle
+CloseBtn.Parent = TopBar
+CloseBtn.Position = UDim2.new(1, -35, 0, 5) 
 
 local dragging = false
-local dragStart
-local startPos
+local dragStart, startPos
 
 DragHandle.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1
-	or input.UserInputType == Enum.UserInputType.Touch then
-
-		dragging = true
-		dragStart = input.Position
-		startPos = TopBar.Position
-
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				dragging = false
-			end
-		end)
-	end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = TopBar.Position
+    end
 end)
 
 UserInputService.InputChanged:Connect(function(input)
-	if not dragging then return end
+    if not dragging then return end
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        local delta = input.Position - dragStart
+        TopBar.Position = UDim2.new(
+            startPos.X.Scale, startPos.X.Offset + delta.X,
+            startPos.Y.Scale, startPos.Y.Offset + delta.Y
+        )
+    end
+end)
 
-	if input.UserInputType == Enum.UserInputType.MouseMovement
-	or input.UserInputType == Enum.UserInputType.Touch then
-
-		local delta = input.Position - dragStart
-
-		TopBar.Position = UDim2.new(
-			startPos.X.Scale,
-			startPos.X.Offset + delta.X,
-			startPos.Y.Scale,
-			startPos.Y.Offset + delta.Y
-		)
-	end
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
 end)
